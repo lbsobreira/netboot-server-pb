@@ -12,6 +12,12 @@ A self-hosted PXE boot server in Docker. Drop ISO files into a folder and networ
 - **Dynamic Menu**: Boot menu auto-generated from available images
 - **Docker-based**: Single container, easy deployment
 
+## Screenshots
+
+| Login Screen | Boot Menu |
+|--------------|-----------|
+| ![Login](docs/screenshots/login-screen.png) | ![Menu](docs/screenshots/boot-menu.png) |
+
 ## Quick Start
 
 ```bash
