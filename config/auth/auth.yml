@@ -1,0 +1,50 @@
+# Netboot Server - Authentication Configuration
+#
+# Supported modes:
+#   local  - Authenticate against users defined in users.yml (default)
+#   ldap   - Authenticate against an LDAP/Active Directory server
+#   both   - Try local first, fall back to LDAP if user not found locally
+#
+mode: local
+
+# ---------------------------------------------------------------------------
+# LDAP / Active Directory Configuration (only used when mode is "ldap" or "both")
+# ---------------------------------------------------------------------------
+# ldap:
+#   # LDAP server URL
+#   # Use ldap:// for unencrypted or ldaps:// for SSL/TLS
+#   server: "ldap://dc01.example.com"
+#   port: 389
+#   use_ssl: false
+#
+#   # Bind mode: "direct_bind" or "search_bind"
+#   #
+#   # direct_bind:
+#   #   Constructs the user DN from a pattern and binds directly.
+#   #   Simpler but requires a predictable DN structure.
+#   #
+#   # search_bind:
+#   #   Uses a service account to search for the user first,
+#   #   then binds as the found user. More flexible, works with
+#   #   complex AD structures.
+#   #
+#   bind_mode: search_bind
+#
+#   # --- direct_bind settings ---
+#   # Pattern to construct the user DN. {username} is replaced with input.
+#   # user_dn_pattern: "CN={username},CN=Users,DC=example,DC=com"
+#
+#   # --- search_bind settings ---
+#   # Service account used to search for users
+#   service_account:
+#     bind_dn: "CN=svc-netboot,CN=Users,DC=example,DC=com"
+#     bind_password: "ServiceAccountPassword"
+#
+#   # Where to search for users
+#   search_base: "DC=example,DC=com"
+#
+#   # LDAP filter to find the user. {username} is replaced with input.
+#   # Common patterns:
+#   #   Active Directory:  (sAMAccountName={username})
+#   #   OpenLDAP:          (uid={username})
+#   search_filter: "(sAMAccountName={username})"

@@ -1,0 +1,32 @@
+# Environment variables (contains network-specific config)
+.env
+
+# OS images (too large for git)
+images/*
+!images/.gitkeep
+!images/README.md
+
+# WinPE directory — keep structure and docs, ignore binaries
+config/winpe/*
+!config/winpe/.gitkeep
+!config/winpe/README.md
+
+# Logs (keep directory, ignore log files)
+logs/*
+!logs/.gitkeep
+
+# TFTP bootloader binaries (downloaded during setup)
+tftp/*
+!tftp/.gitkeep
+
+# Docker
+.docker/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+*.swo

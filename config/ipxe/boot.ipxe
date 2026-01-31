@@ -1,0 +1,47 @@
+#!ipxe
+#
+# Netboot Server - Boot Entry Point
+#
+# This is the first script loaded by iPXE after the bootloader starts.
+# It prompts for credentials and authenticates against the auth service.
+# On success, the auth service returns the menu script which is chained.
+#
+
+# Set the server URL from DHCP next-server or use a fallback
+isset ${next-server} || set next-server ${dhcp-server}
+set server-url http://${next-server}:8080
+
+# Show banner
+echo
+echo =======================================
+echo       N E T B O O T   S E R V E R
+echo =======================================
+echo
+echo   Network Boot Service
+echo   Authentication Required
+echo
+echo =======================================
+
+:login
+echo
+echo -n Username: && read username
+echo -n Password: && read password
+echo
+
+# POST credentials to the auth service
+# ##params tells iPXE to send the form parameters as a POST request
+# On success (HTTP 200), the response IS the menu script — chain it
+# On failure (HTTP 401), chain fails and we go to :failed
+params
+param username ${username}
+param password ${password}
+chain --autofree ${server-url}/auth/boot.ipxe##params || goto failed
+
+:failed
+echo
+echo  *** Authentication failed. Access denied. ***
+echo
+clear username
+clear password
+sleep 3
+goto login

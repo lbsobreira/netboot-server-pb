@@ -1,0 +1,19 @@
+services:
+  netboot:
+    build: .
+    container_name: netboot-server
+    network_mode: host
+    privileged: true  # Required for NFS kernel server (Proxmox/TrueNAS boot)
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./config/dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf:ro
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/ipxe:/srv/ipxe
+      - ./config/auth/auth.yml:/etc/netboot/auth.yml:ro
+      - ./config/auth/users.yml:/etc/netboot/users.yml:ro
+      - ./images:/srv/images
+      - ./tftp:/srv/tftp:ro
+    cap_add:
+      - NET_ADMIN

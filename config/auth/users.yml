@@ -1,0 +1,15 @@
+# Netboot Server - Local Users
+#
+# Used when auth mode is "local" or "both" in auth.yml.
+#
+# To generate a password hash, run:
+#   python auth/hash-password.py
+#
+# Or with Docker:
+#   docker compose exec netboot python /opt/netboot/auth/hash-password.py
+#
+# Default user: admin / netboot (CHANGE THIS!)
+#
+users:
+  - username: admin
+    password_hash: "$2b$12$yzMmlCNc9pTTujMwVVzmpul14SkgVCFWS5O/n6U9FlMDSJNFqEjzS"
