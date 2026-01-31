@@ -53,9 +53,15 @@ Copy these files into this `config/winpe/` directory:
 | `C:\WinPE\media\Boot\boot.sdi` | `config/winpe/boot.sdi` |
 
 ```cmd
-copy C:\WinPE\media\sources\boot.wim   \\<your-server>\path\to\netboot-server\images\winpe\
-copy C:\WinPE\media\Boot\BCD           \\<your-server>\path\to\netboot-server\images\winpe\
-copy C:\WinPE\media\Boot\boot.sdi      \\<your-server>\path\to\netboot-server\images\winpe\
+:: Option A: Copy via network share
+copy C:\WinPE\media\sources\boot.wim   \\<your-server>\netboot-server\config\winpe\
+copy C:\WinPE\media\Boot\BCD           \\<your-server>\netboot-server\config\winpe\
+copy C:\WinPE\media\Boot\boot.sdi      \\<your-server>\netboot-server\config\winpe\
+
+:: Option B: Copy via SCP (if OpenSSH available)
+scp C:\WinPE\media\sources\boot.wim   user@server:/path/to/netboot-server/config/winpe/
+scp C:\WinPE\media\Boot\BCD           user@server:/path/to/netboot-server/config/winpe/
+scp C:\WinPE\media\Boot\boot.sdi      user@server:/path/to/netboot-server/config/winpe/
 ```
 
 ## Result
@@ -67,7 +73,7 @@ config/winpe/
 ├── .gitkeep
 ├── README.md
 ├── boot.wim      (~250-400 MB)
-├── BCD            (~256 KB)
+├── BCD            (~16 KB)
 └── boot.sdi       (~3 MB)
 ```
 

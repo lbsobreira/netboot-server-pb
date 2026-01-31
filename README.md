@@ -88,16 +88,89 @@ This extracts boot files and generates the PXE menu automatically.
 
 ## Windows PXE Boot Setup
 
-Windows requires a WinPE image built from the Windows ADK. This is a one-time setup:
+Windows PXE boot requires Windows PE (WinPE) files built from the Windows ADK. Unlike Linux ISOs that work directly, Windows needs a special boot environment with SMB networking support to access installation files over the network.
 
-1. On a Windows machine, install the [Windows ADK](https://learn.microsoft.com/en-us/windows-hardware/get-started/adk-install)
-2. Build WinPE following the instructions in `config/winpe/README.md`
-3. Copy the resulting files to `config/winpe/`:
-   - `boot.wim`
-   - `BCD`
-   - `boot.sdi`
+**Why?** Retail Windows ISOs include a `boot.wim` designed for DVD/USB — it lacks the SMB client needed for network installation. The ADK WinPE has full networking support.
 
-See [`config/winpe/README.md`](config/winpe/README.md) for detailed instructions.
+This is a **one-time setup**. The same WinPE files work for all Windows versions (10, 11, Server 2019, 2022, etc.).
+
+### Step 1: Download and Install Windows ADK
+
+On a Windows machine, download **both** installers from Microsoft:
+
+1. Go to: https://learn.microsoft.com/en-us/windows-hardware/get-started/adk-install
+
+2. Download and install **Windows ADK** (only "Deployment Tools" feature needed)
+
+3. Download and install **Windows PE add-on for the ADK** (separate download, same page)
+
+### Step 2: Create WinPE
+
+Open **Start Menu** → search for **"Deployment and Imaging Tools Environment"** → **Run as Administrator**
+
+```cmd
+:: Create WinPE working directory
+copype amd64 C:\WinPE
+```
+
+(Optional) Add extra components for scripting support:
+
+```cmd
+:: Mount the image
+Dism /Mount-Image /ImageFile:C:\WinPE\media\sources\boot.wim /Index:1 /MountDir:C:\WinPE\mount
+
+:: Add WMI and scripting support
+Dism /Image:C:\WinPE\mount /Add-Package /PackagePath:"C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-WMI.cab"
+Dism /Image:C:\WinPE\mount /Add-Package /PackagePath:"C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-Scripting.cab"
+
+:: Save and unmount
+Dism /Unmount-Image /MountDir:C:\WinPE\mount /Commit
+```
+
+### Step 3: Copy Files to Server
+
+Copy these 3 files to `config/winpe/` on your netboot server:
+
+| Source (Windows) | Destination (Server) | Size |
+|------------------|----------------------|------|
+| `C:\WinPE\media\sources\boot.wim` | `config/winpe/boot.wim` | ~300 MB |
+| `C:\WinPE\media\Boot\BCD` | `config/winpe/BCD` | ~16 KB |
+| `C:\WinPE\media\Boot\boot.sdi` | `config/winpe/boot.sdi` | ~3 MB |
+
+**Copy methods:**
+
+```cmd
+:: Option A: If server has SMB share accessible
+copy C:\WinPE\media\sources\boot.wim   \\server\netboot-server\config\winpe\
+copy C:\WinPE\media\Boot\BCD           \\server\netboot-server\config\winpe\
+copy C:\WinPE\media\Boot\boot.sdi      \\server\netboot-server\config\winpe\
+
+:: Option B: Using SCP (if OpenSSH installed)
+scp C:\WinPE\media\sources\boot.wim   user@server:/path/to/netboot-server/config/winpe/
+scp C:\WinPE\media\Boot\BCD           user@server:/path/to/netboot-server/config/winpe/
+scp C:\WinPE\media\Boot\boot.sdi      user@server:/path/to/netboot-server/config/winpe/
+
+:: Option C: Copy to USB drive, then transfer manually
+```
+
+### Step 4: Add Windows ISO and Prepare
+
+```bash
+# Copy your Windows ISO
+cp windows-11-pro-24h2-x64.iso images/
+
+# Prepare (extracts ISO, replaces boot files with WinPE, generates menu)
+./scripts/prepare-images.sh
+```
+
+The script automatically:
+- Extracts the Windows ISO
+- Replaces boot files with your WinPE (enabling SMB support)
+- Injects startup script to map network share and launch setup
+- Adds bypass for TPM/Secure Boot/RAM checks (Windows 11)
+- Updates the boot menu
+
+**Done!** Windows PXE boot is now ready.
 
 ## Configuration
 
